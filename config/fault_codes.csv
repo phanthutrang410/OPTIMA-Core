@@ -1,0 +1,231 @@
+code_key,scope,type,number,name,group,doc_code,device,device_name,fault_type
+APS/error/1,APS,error,1,Modbus TCP value out of range,G09,A1,CONTROL,"Bộ điều khiển (control card, APMC)","Truyền thông (Modbus, Powerlink)"
+APS/error/2,APS,error,2,Configuration corrupt,G09,A2,CONTROL,"Bộ điều khiển (control card, APMC)","Sai cấu hình, chế độ, cấp phép, đang cập nhật"
+APS/error/3,APS,error,3,APU 1 / 2 cooling fluid low,G02,A3,ENCLOSURE,Môi trường tủ,Thiếu dịch làm mát
+APS/error/4,APS,error,4,APU 3 / 4 cooling fluid low,G02,A4,ENCLOSURE,Môi trường tủ,Thiếu dịch làm mát
+APS/error/5,APS,error,5,No enable signal,G05,A5,SWITCHGEAR,Thiết bị đóng cắt và bảo vệ,Không có enable / cửa tủ mở
+APS/error/6,APS,error,6,No supply voltage,G05,A6,SWITCHGEAR,Thiết bị đóng cắt và bảo vệ,Mất nguồn / áp nguồn thấp
+APS/error/7,APS,error,7,Medium voltage switch gear off,G07,A7,SWITCHGEAR,Thiết bị đóng cắt và bảo vệ,Tủ trung thế tắt
+APS/error/8,APS,error,8,DI Temperature not OK,G01,A8,ENCLOSURE,Môi trường tủ,Nhiệt độ tủ cao
+APS/error/9,APS,error,9,DI medium voltage transformer error,G07,A9,GRID,Truyền tải điện và MBA,Lỗi MBA trung thế
+APS/error/10,APS,error,10,APU 1 / 2 water pump switching cycles,G02,A10,ENCLOSURE,Môi trường tủ,Bơm nước đóng cắt quá nhiều
+APS/error/11,APS,error,11,APU 3 / 4 water pump switching cycles,G02,A11,ENCLOSURE,Môi trường tủ,Bơm nước đóng cắt quá nhiều
+APS/error/12,APS,error,12,APU 5 / 6 water pump switching cycles,G02,A12,ENCLOSURE,Môi trường tủ,Bơm nước đóng cắt quá nhiều
+APS/error/13,APS,error,13,APU 1 / 2 air-to-air cooler switching cycles,G02,A13,ENCLOSURE,Môi trường tủ,Quạt khí-khí đóng cắt quá nhiều
+APS/error/14,APS,error,14,APU 3 / 4 air-to-air cooler switching cycles,G02,A14,ENCLOSURE,Môi trường tủ,Quạt khí-khí đóng cắt quá nhiều
+APS/error/15,APS,error,15,APU 5 / 6 air-to-air cooler switching cycles,G02,A15,ENCLOSURE,Môi trường tủ,Quạt khí-khí đóng cắt quá nhiều
+APS/error/16,APS,error,16,APU 1 / 2 water air cooler switching cycles,G02,A16,ENCLOSURE,Môi trường tủ,Quạt nước-khí đóng cắt quá nhiều
+APS/error/17,APS,error,17,APU 3 / 4 water air c ooler switching cycles,G02,A17,ENCLOSURE,Môi trường tủ,Quạt nước-khí đóng cắt quá nhiều
+APS/error/18,APS,error,18,APU 5 / 6 water air cooler switching cycles,G02,A18,ENCLOSURE,Môi trường tủ,Quạt nước-khí đóng cắt quá nhiều
+APS/error/19,APS,error,19,Supply voltage low,G05,A19,SWITCHGEAR,Thiết bị đóng cắt và bảo vệ,Mất nguồn / áp nguồn thấp
+APS/error/20,APS,error,20,Modbus TCP timeout,G09,A20,CONTROL,"Bộ điều khiển (control card, APMC)","Truyền thông (Modbus, Powerlink)"
+APS/error/21,APS,error,21,APU 1 / 2 insulation,G08,A21,INSULATION,Cách điện và nối đất,Lỗi cách điện
+APS/error/22,APS,error,22,APU 3 / 4 insulation,G08,A22,INSULATION,Cách điện và nối đất,Lỗi cách điện
+APS/error/23,APS,error,23,APU 5 / 6 insulation,G08,A23,INSULATION,Cách điện và nối đất,Lỗi cách điện
+APS/error/24,APS,error,24,Medium voltage transformer temperature high,G01,A24,GRID,Truyền tải điện và MBA,Quá nhiệt MBA trung thế
+APS/error/25,APS,error,25,APU 5 / 6 cooling fluid low,G02,A25,ENCLOSURE,Môi trường tủ,Thiếu dịch làm mát
+APS/error/26,APS,error,26,Error count overrun,G10,A26,CONTROL,"Bộ điều khiển (control card, APMC)",Quá nhiều lỗi trong 1 giờ
+APS/error/27,APS,error,27,APU 1 / 2 insulation monitor failed,G08,A27,INSULATION,Cách điện và nối đất,Bộ giám sát cách điện hỏng
+APS/error/28,APS,error,28,APU 3 / 4 insulation monitor failed,G08,A28,INSULATION,Cách điện và nối đất,Bộ giám sát cách điện hỏng
+APS/error/29,APS,error,29,APU 5 / 6 insulation monitor failed,G08,A29,INSULATION,Cách điện và nối đất,Bộ giám sát cách điện hỏng
+APS/error/30,APS,error,30,APU 1 Powerlink,G09,A30,CONTROL,"Bộ điều khiển (control card, APMC)","Truyền thông (Modbus, Powerlink)"
+APS/error/31,APS,error,31,APU 2 Powerlink,G09,A31,CONTROL,"Bộ điều khiển (control card, APMC)","Truyền thông (Modbus, Powerlink)"
+APS/error/32,APS,error,32,APU 3 Powerlink,G09,A32,CONTROL,"Bộ điều khiển (control card, APMC)","Truyền thông (Modbus, Powerlink)"
+APS/error/33,APS,error,33,APU 4 Powerlink,G09,A33,CONTROL,"Bộ điều khiển (control card, APMC)","Truyền thông (Modbus, Powerlink)"
+APS/error/34,APS,error,34,APU 5 Powerlink,G09,A34,CONTROL,"Bộ điều khiển (control card, APMC)","Truyền thông (Modbus, Powerlink)"
+APS/error/35,APS,error,35,APU 6 Powerlink,G09,A35,CONTROL,"Bộ điều khiển (control card, APMC)","Truyền thông (Modbus, Powerlink)"
+APS/error/36,APS,error,36,APU 1 type mismatch,G09,A36,CONTROL,"Bộ điều khiển (control card, APMC)","Sai loại / phiên bản control module, firmware"
+APS/error/37,APS,error,37,APU 2 type mismatch,G09,A37,CONTROL,"Bộ điều khiển (control card, APMC)","Sai loại / phiên bản control module, firmware"
+APS/error/38,APS,error,38,APU 3 type mismatch,G09,A38,CONTROL,"Bộ điều khiển (control card, APMC)","Sai loại / phiên bản control module, firmware"
+APS/error/39,APS,error,39,APU 4 type mismatch,G09,A39,CONTROL,"Bộ điều khiển (control card, APMC)","Sai loại / phiên bản control module, firmware"
+APS/error/40,APS,error,40,APU 5 type mismatch,G09,A40,CONTROL,"Bộ điều khiển (control card, APMC)","Sai loại / phiên bản control module, firmware"
+APS/error/41,APS,error,41,APU 6 type mismatch,G09,A41,CONTROL,"Bộ điều khiển (control card, APMC)","Sai loại / phiên bản control module, firmware"
+APS/error/42,APS,error,42,APS unlicensed,G09,A42,CONTROL,"Bộ điều khiển (control card, APMC)","Sai cấu hình, chế độ, cấp phép, đang cập nhật"
+APS/error/43,APS,error,43,Internal configuration not valid,G09,A43,CONTROL,"Bộ điều khiển (control card, APMC)","Sai cấu hình, chế độ, cấp phép, đang cập nhật"
+APS/error/44,APS,error,44,APU Update,G11,A44,CONTROL,"Bộ điều khiển (control card, APMC)","Sai cấu hình, chế độ, cấp phép, đang cập nhật"
+APS/error/45,APS,error,45,APMC — Battery missing/empty,G05,A45,CONTROL,"Bộ điều khiển (control card, APMC)",Pin APMC
+APS/error/46,APS,error,46,APU1/2 Insulation Monitoring (pos. ground),G08,A46,INSULATION,Cách điện và nối đất,Phản hồi nối đất dương / âm
+APS/error/47,APS,error,47,APU3/4 Insulation Monitoring (pos. ground),G08,A47,INSULATION,Cách điện và nối đất,Phản hồi nối đất dương / âm
+APS/error/48,APS,error,48,APU1/2 Insulation Monitoring (neg. ground),G08,A48,INSULATION,Cách điện và nối đất,Phản hồi nối đất dương / âm
+APS/error/49,APS,error,49,APU3/4 Insulation Monitoring (neg. ground),G08,A49,INSULATION,Cách điện và nối đất,Phản hồi nối đất dương / âm
+APS/error/50,APS,error,50,APU1/2 extern Insulation Monitoring,G08,A50,INSULATION,Cách điện và nối đất,IMD ngoài báo lỗi
+APS/error/51,APS,error,51,APU3/4 extern Insulation Monitoring,G08,A51,INSULATION,Cách điện và nối đất,IMD ngoài báo lỗi
+APS/error/53,APS,error,53,APU1/2 high Temperature,G01,A53,ENCLOSURE,Môi trường tủ,Công tắc nhiệt báo sai
+APS/error/54,APS,error,54,APU3/4 high Temperature,G01,A54,ENCLOSURE,Môi trường tủ,Công tắc nhiệt báo sai
+APS/error/55,APS,error,55,APU1/2 Island Fuses,G07,A55,SWITCHGEAR,Thiết bị đóng cắt và bảo vệ,Cầu chì island
+APS/error/56,APS,error,56,APU3/4 Island Fuses,G07,A56,SWITCHGEAR,Thiết bị đóng cắt và bảo vệ,Cầu chì island
+APS/error/57,APS,error,57,Humidity to high,G01,A57,ENCLOSURE,Môi trường tủ,Độ ẩm cao
+APS/warning/1,APS,warning,1,APU 1 / 2 cooling fluid low,G02,,,,
+APS/warning/2,APS,warning,2,APU 3 / 4 cooling fluid low,G02,,,,
+APS/warning/3,APS,warning,3,Time synchronisation failed,G09,,,,
+APS/warning/4,APS,warning,4,Modbus RTU (Display),G09,,,,
+APS/warning/5,APS,warning,5,DC surge arrester tripped,G11,,,,
+APS/warning/6,APS,warning,6,APU 1 / 2 insulation monitor failed,G08,,,,
+APS/warning/7,APS,warning,7,APU 3 / 4 insulation monitor failed,G08,,,,
+APS/warning/8,APS,warning,8,Reserved,RESERVED,,,,
+APS/warning/9,APS,warning,9,Reserved,RESERVED,,,,
+APS/warning/10,APS,warning,10,APU 1 / 2 insulation level 2,G08,,,,
+APS/warning/11,APS,warning,11,APU 3 / 4 insulation level 2,G08,,,,
+APS/warning/12,APS,warning,12,Reserved,RESERVED,,,,
+APS/warning/13,APS,warning,13,APU 1 / 2 insulation level 1,G08,,,,
+APS/warning/14,APS,warning,14,APU 3 / 4 insulation level 1,G08,,,,
+APS/warning/15,APS,warning,15,Reserved,RESERVED,,,,
+APS/warning/22,APS,warning,22,APU 1 error,G10,,,,
+APS/warning/23,APS,warning,23,APU 2 error,G10,,,,
+APS/warning/24,APS,warning,24,APU 3 error,G10,,,,
+APS/warning/25,APS,warning,25,APU 4 error,G10,,,,
+APS/warning/26,APS,warning,26,Reserved,RESERVED,,,,
+APS/warning/27,APS,warning,27,Reserved,RESERVED,,,,
+APS/warning/28,APS,warning,28,Reserved,RESERVED,,,,
+APS/warning/29,APS,warning,29,APU 1 Powerlink,G09,,,,
+APS/warning/30,APS,warning,30,APU 2 Powerlink,G09,,,,
+APS/warning/31,APS,warning,31,APU 3 Powerlink,G09,,,,
+APS/warning/32,APS,warning,32,APU 4 Powerlink,G09,,,,
+APS/warning/33,APS,warning,33,Reserved,RESERVED,,,,
+APS/warning/34,APS,warning,34,Reserved,RESERVED,,,,
+APS/warning/35,APS,warning,35,Power limit transformer,G11,,,,
+APS/warning/36,APS,warning,36,Power limit ambient,G11,,,,
+APS/warning/37,APS,warning,37,APU 1 error counter overrun,G10,,,,
+APS/warning/38,APS,warning,38,APU 2 error counter overrun,G10,,,,
+APS/warning/39,APS,warning,39,APU 3 error counter overrun,G10,,,,
+APS/warning/40,APS,warning,40,APU 4 error counter overrun,G10,,,,
+APS/warning/41,APS,warning,41,Reserved,RESERVED,,,,
+APS/warning/42,APS,warning,42,Reserved,RESERVED,,,,
+APS/warning/43,APS,warning,43,APU in manual Mode,G11,,OPERATION,Vận hành (không hỏng thiết bị),Chế độ tay / bảo trì / APU bị tắt
+APS/warning/44,APS,warning,44,Cooling in manual mode,G11,,OPERATION,Vận hành (không hỏng thiết bị),Chế độ tay / bảo trì / APU bị tắt
+APS/warning/45,APS,warning,45,Heating in manual mode,G11,,OPERATION,Vận hành (không hỏng thiết bị),Chế độ tay / bảo trì / APU bị tắt
+APS/warning/46,APS,warning,46,APU in service mode,G11,,OPERATION,Vận hành (không hỏng thiết bị),Chế độ tay / bảo trì / APU bị tắt
+APS/warning/47,APS,warning,47,Log samples lost,G09,,,,
+APS/warning/48,APS,warning,48,APU 1 / 2 current measurement,G09,,,,
+APS/warning/49,APS,warning,49,APU 3 / 4 current measurement,G09,,,,
+APS/warning/50,APS,warning,50,Reserved,RESERVED,,,,
+APS/warning/51,APS,warning,51,APU 1 / 2 Powerlink flicker,G09,,,,
+APS/warning/52,APS,warning,52,APU 3 / 4 Powerlink flicker,G09,,,,
+APS/warning/53,APS,warning,53,Reserved,RESERVED,,,,
+APS/warning/54,APS,warning,54,APU1/2 insulation monitoring (pos. ground),G08,,,,
+APS/warning/55,APS,warning,55,APU3/4 insulation monitoring (pos. ground),G08,,,,
+APS/warning/56,APS,warning,56,APU1/2 insulation monitoring (neg. ground),G08,,,,
+APS/warning/57,APS,warning,57,APU3/4 insulation monitoring (neg. ground),G08,,,,
+APS/warning/58,APS,warning,58,APU1/2 extern insulation monitoring,G08,,,,
+APS/warning/59,APS,warning,59,APU3/4 extern insulation monitoring,G08,,,,
+APS/warning/60,APS,warning,60,USB-device almost full,G09,,,,
+APS/warning/61,APS,warning,61,USB-dDevice full,G09,,,,
+APS/warning/62,APS,warning,62,CMB update,G11,,,,
+APS/warning/63,APS,warning,63,IMD update,G11,,,,
+APS/warning/64,APS,warning,64,Max ModbusTCP master exceeded,G09,,,,
+APS/warning/65,APS,warning,65,APU 1 disable,G11,,OPERATION,Vận hành (không hỏng thiết bị),Chế độ tay / bảo trì / APU bị tắt
+APS/warning/66,APS,warning,66,APU 2 disable,G11,,OPERATION,Vận hành (không hỏng thiết bị),Chế độ tay / bảo trì / APU bị tắt
+APS/warning/67,APS,warning,67,APU 3 disable,G11,,OPERATION,Vận hành (không hỏng thiết bị),Chế độ tay / bảo trì / APU bị tắt
+APS/warning/68,APS,warning,68,APU 4 disable,G11,,OPERATION,Vận hành (không hỏng thiết bị),Chế độ tay / bảo trì / APU bị tắt
+APS/warning/69,APS,warning,69,USB-Device failed,G09,,,,
+APU/error/1,APU,error,1,Overtemperature IGBT L1,G01,B1,IGBT,Module IGBT,Quá nhiệt
+APU/error/2,APU,error,2,Overtemperature IGBT L2,G01,B2,IGBT,Module IGBT,Quá nhiệt
+APU/error/3,APU,error,3,Overtemperature IGBT L3,G01,B3,IGBT,Module IGBT,Quá nhiệt
+APU/error/4,APU,error,4,Overtemperature inductance,G01,B4,INDUCTOR,Cuộn cảm,Quá nhiệt
+APU/error/5,APU,error,5,Overvoltage Vdc pos. SW,G03,B5,DC,"Phía DC (PV, DC-link)",Quá áp
+APU/error/6,APU,error,6,Overvoltage Vdc neg. SW,G03,B6,DC,"Phía DC (PV, DC-link)",Quá áp
+APU/error/7,APU,error,7,Overvoltage Vdc total SW,G03,B7,DC,"Phía DC (PV, DC-link)",Quá áp
+APU/error/8,APU,error,8,Undervoltage Vdc pos. SW,G03,B8,DC,"Phía DC (PV, DC-link)",Thiếu áp
+APU/error/9,APU,error,9,Undervoltage Vdc neg. SW,G03,B9,DC,"Phía DC (PV, DC-link)",Thiếu áp
+APU/error/10,APU,error,10,Undervoltage Vdc total SW,G03,B10,DC,"Phía DC (PV, DC-link)",Thiếu áp
+APU/error/11,APU,error,11,Overcurrent Idc SW,G04,B11,DC,"Phía DC (PV, DC-link)",Quá dòng
+APU/error/12,APU,error,12,Overcurrent Iac L1 SW,G04,B12,IGBT,Module IGBT,Quá dòng pha AC
+APU/error/13,APU,error,13,Overcurrent Iac L2 SW,G04,B13,IGBT,Module IGBT,Quá dòng pha AC
+APU/error/14,APU,error,14,Overcurrent Iac L3 SW,G04,B14,IGBT,Module IGBT,Quá dòng pha AC
+APU/error/16,APU,error,16,Grid rotation Error,G07,B16,GRID,Truyền tải điện và MBA,Sai thứ tự pha
+APU/error/17,APU,error,17,Overfrequency level 1,G07,B17,GRID,Truyền tải điện và MBA,Tần số ngoài ngưỡng
+APU/error/18,APU,error,18,Overfrequency level 2,G07,B18,GRID,Truyền tải điện và MBA,Tần số ngoài ngưỡng
+APU/error/19,APU,error,19,Overfrequency level 3,G07,B19,GRID,Truyền tải điện và MBA,Tần số ngoài ngưỡng
+APU/error/20,APU,error,20,Underfrequency level 1,G07,B20,GRID,Truyền tải điện và MBA,Tần số ngoài ngưỡng
+APU/error/21,APU,error,21,Underfrequency level 2,G07,B21,GRID,Truyền tải điện và MBA,Tần số ngoài ngưỡng
+APU/error/22,APU,error,22,Overvoltage VL1 level 1,G07,B22,GRID,Truyền tải điện và MBA,Quá áp lưới
+APU/error/23,APU,error,23,Overvoltage VL1 level 2,G07,B23,GRID,Truyền tải điện và MBA,Quá áp lưới
+APU/error/24,APU,error,24,Overvoltage VL1 level 3,G07,B24,GRID,Truyền tải điện và MBA,Quá áp lưới
+APU/error/25,APU,error,25,Overvoltage VL2 level 1,G07,B25,GRID,Truyền tải điện và MBA,Quá áp lưới
+APU/error/26,APU,error,26,Overvoltage VL2 level 2,G07,B26,GRID,Truyền tải điện và MBA,Quá áp lưới
+APU/error/27,APU,error,27,Overvoltage VL2 level 3,G07,B27,GRID,Truyền tải điện và MBA,Quá áp lưới
+APU/error/28,APU,error,28,Overvoltage VL3 level 1,G07,B28,GRID,Truyền tải điện và MBA,Quá áp lưới
+APU/error/29,APU,error,29,Overvoltage VL3 level 2,G07,B29,GRID,Truyền tải điện và MBA,Quá áp lưới
+APU/error/30,APU,error,30,Overvoltage VL3 level 3,G07,B30,GRID,Truyền tải điện và MBA,Quá áp lưới
+APU/error/31,APU,error,31,Undervoltage VL1 level 1,G07,B31,GRID,Truyền tải điện và MBA,Thiếu áp lưới
+APU/error/32,APU,error,32,Undervoltage VL1 level 2,G07,B32,GRID,Truyền tải điện và MBA,Thiếu áp lưới
+APU/error/33,APU,error,33,Undervoltage VL2 level 1,G07,B33,GRID,Truyền tải điện và MBA,Thiếu áp lưới
+APU/error/34,APU,error,34,Undervoltage VL2 level 2,G07,B34,GRID,Truyền tải điện và MBA,Thiếu áp lưới
+APU/error/35,APU,error,35,Undervoltage VL3 level 1,G07,B35,GRID,Truyền tải điện và MBA,Thiếu áp lưới
+APU/error/36,APU,error,36,Undervoltage VL3 level 2,G07,B36,GRID,Truyền tải điện và MBA,Thiếu áp lưới
+APU/error/37,APU,error,37,Driver L1,G06,B37,DRIVER,Driver cổng,Driver pha hỏng
+APU/error/38,APU,error,38,Driver L2,G06,B38,DRIVER,Driver cổng,Driver pha hỏng
+APU/error/39,APU,error,39,Driver L3,G06,B39,DRIVER,Driver cổng,Driver pha hỏng
+APU/error/40,APU,error,40,Overcurrent Idc HW,G04,B40,DC,"Phía DC (PV, DC-link)",Quá dòng
+APU/error/41,APU,error,41,Overcurrent Iac L1 HW,G04,B41,IGBT,Module IGBT,Quá dòng pha AC
+APU/error/42,APU,error,42,Overcurrent Iac L2 HW,G04,B42,IGBT,Module IGBT,Quá dòng pha AC
+APU/error/43,APU,error,43,Overcurrent Iac L3 HW,G04,B43,IGBT,Module IGBT,Quá dòng pha AC
+APU/error/44,APU,error,44,Overtemperature IGBT HW,G01,B44,IGBT,Module IGBT,Quá nhiệt
+APU/error/46,APU,error,46,Supply error,G05,B46,CONTROL,"Bộ điều khiển (control card, APMC)",Nguồn nội bộ
+APU/error/47,APU,error,47,Supply error delayed,G05,B47,CONTROL,"Bộ điều khiển (control card, APMC)",Nguồn nội bộ
+APU/error/48,APU,error,48,Overvoltage Vdc neg. HW,G03,B48,DC,"Phía DC (PV, DC-link)",Quá áp
+APU/error/49,APU,error,49,Undervoltage Vdc neg. HW,G03,B49,DC,"Phía DC (PV, DC-link)",Thiếu áp
+APU/error/50,APU,error,50,Overvoltage Vdc pos. HW,G03,B50,DC,"Phía DC (PV, DC-link)",Quá áp
+APU/error/51,APU,error,51,Undervoltage Vdc pos. HW,G03,B51,DC,"Phía DC (PV, DC-link)",Thiếu áp
+APU/error/52,APU,error,52,Overvoltage Vdc total HW,G03,B52,DC,"Phía DC (PV, DC-link)",Quá áp
+APU/error/53,APU,error,53,Supply error 15V neg. SW,G05,B53,CONTROL,"Bộ điều khiển (control card, APMC)",Nguồn nội bộ
+APU/error/54,APU,error,54,Supply error 15V pos. sum. SW,G05,B54,CONTROL,"Bộ điều khiển (control card, APMC)",Nguồn nội bộ
+APU/error/56,APU,error,56,Supply error 24V driver pos. SW,G05,B56,CONTROL,"Bộ điều khiển (control card, APMC)",Nguồn nội bộ
+APU/error/57,APU,error,57,Supply error 24V neg. SW,G05,B57,CONTROL,"Bộ điều khiển (control card, APMC)",Nguồn nội bộ
+APU/error/58,APU,error,58,Supply error 24V pos. SW,G05,B58,CONTROL,"Bộ điều khiển (control card, APMC)",Nguồn nội bộ
+APU/error/59,APU,error,59,Supply error 5V pos. SW,G05,B59,CONTROL,"Bộ điều khiển (control card, APMC)",Nguồn nội bộ
+APU/error/60,APU,error,60,AC switch,G12,B60,SWITCHGEAR,Thiết bị đóng cắt và bảo vệ,Phản hồi AC switch / DC switch
+APU/error/61,APU,error,61,DC switch,G12,B61,SWITCHGEAR,Thiết bị đóng cắt và bảo vệ,Phản hồi AC switch / DC switch
+APU/error/62,APU,error,62,Enable 24V,G05,B62,SWITCHGEAR,Thiết bị đóng cắt và bảo vệ,Không có enable / cửa tủ mở
+APU/error/63,APU,error,63,Driver version L1,G09,B63,DRIVER,Driver cổng,Lắp sai phiên bản
+APU/error/64,APU,error,64,Driver version L2,G09,B64,DRIVER,Driver cổng,Lắp sai phiên bản
+APU/error/65,APU,error,65,Driver version L3,G09,B65,DRIVER,Driver cổng,Lắp sai phiên bản
+APU/error/66,APU,error,66,CPLD version,G09,B66,CONTROL,"Bộ điều khiển (control card, APMC)","Sai loại / phiên bản control module, firmware"
+APU/error/67,APU,error,67,HW control card,G09,B67,CONTROL,"Bộ điều khiển (control card, APMC)","Sai loại / phiên bản control module, firmware"
+APU/error/68,APU,error,68,Model control card,G09,B68,CONTROL,"Bộ điều khiển (control card, APMC)","Sai loại / phiên bản control module, firmware"
+APU/error/69,APU,error,69,AC pre-charge,G12,B69,SWITCHGEAR,Thiết bị đóng cắt và bảo vệ,Tiền nạp AC / DC
+APU/error/70,APU,error,70,DC pre-charge,G12,B70,SWITCHGEAR,Thiết bị đóng cắt và bảo vệ,Tiền nạp AC / DC
+APU/error/71,APU,error,71,Sector synchronisation,G07,B71,CONTROL,"Bộ điều khiển (control card, APMC)",Đồng bộ sector
+APU/error/72,APU,error,72,No sync. signal,G07,B72,CONTROL,"Bộ điều khiển (control card, APMC)",Đồng bộ sector
+APU/error/73,APU,error,73,Wrong firmware version,G09,B73,CONTROL,"Bộ điều khiển (control card, APMC)","Sai loại / phiên bản control module, firmware"
+APU/error/74,APU,error,74,Wrong control mode,G09,B74,CONTROL,"Bộ điều khiển (control card, APMC)","Sai cấu hình, chế độ, cấp phép, đang cập nhật"
+APU/error/75,APU,error,75,Current sum error,G04,B75,GRID,Truyền tải điện và MBA,"Sai lệch tổng dòng (biến dòng, chạm đất AC)"
+APU/error/76,APU,error,76,Driver L1,G06,B76,DRIVER,Driver cổng,Driver pha hỏng
+APU/error/77,APU,error,77,Driver L2,G06,B77,DRIVER,Driver cổng,Driver pha hỏng
+APU/error/78,APU,error,78,Driver L3,G06,B78,DRIVER,Driver cổng,Driver pha hỏng
+APU/error/79,APU,error,79,Overcurrent Idc HW,G04,B79,DC,"Phía DC (PV, DC-link)",Quá dòng
+APU/error/80,APU,error,80,Overcurrent Iac L1 HW,G04,B80,IGBT,Module IGBT,Quá dòng pha AC
+APU/error/81,APU,error,81,Overcurrent Iac L2 HW,G04,B81,IGBT,Module IGBT,Quá dòng pha AC
+APU/error/82,APU,error,82,Overcurrent Iac L3 HW,G04,B82,IGBT,Module IGBT,Quá dòng pha AC
+APU/error/83,APU,error,83,PWM error,G06,B83,DRIVER,Driver cổng,PWM lỗi
+APU/error/84,APU,error,84,Overvoltage Vdc neg. HW,G03,B84,DC,"Phía DC (PV, DC-link)",Quá áp
+APU/error/85,APU,error,85,Undervoltage Vdc neg. HW,G03,B85,DC,"Phía DC (PV, DC-link)",Thiếu áp
+APU/error/86,APU,error,86,Overvoltage Vdc pos. HW,G03,B86,DC,"Phía DC (PV, DC-link)",Quá áp
+APU/error/87,APU,error,87,Undervoltage Vdc pos. HW,G03,B87,DC,"Phía DC (PV, DC-link)",Thiếu áp
+APU/error/88,APU,error,88,Overvoltage Vdc total HW,G03,B88,DC,"Phía DC (PV, DC-link)",Quá áp
+APU/error/89,APU,error,89,Overtemperature IGBT HW,G01,B89,IGBT,Module IGBT,Quá nhiệt
+APU/error/90,APU,error,90,Overcurrent Booster HW,G04,B90,BOOSTER,Mạch Booster / chopper,Quá dòng
+APU/error/91,APU,error,91,Driver Chopper,G06,B91,BOOSTER,Mạch Booster / chopper,Driver hỏng
+APU/error/92,APU,error,92,Supply error,G05,B92,CONTROL,"Bộ điều khiển (control card, APMC)",Nguồn nội bộ
+APU/error/93,APU,error,93,Supply error delayed,G05,B93,CONTROL,"Bộ điều khiển (control card, APMC)",Nguồn nội bộ
+APU/error/94,APU,error,94,Driver Booster,G06,B94,BOOSTER,Mạch Booster / chopper,Driver hỏng
+APU/error/95,APU,error,95,No driver detected,G06,B95,DRIVER,Driver cổng,Không tìm thấy driver
+APU/error/96,APU,error,96,Overvoltage VL1 level 4,G07,B96,GRID,Truyền tải điện và MBA,Quá áp lưới
+APU/error/97,APU,error,97,Overvoltage VL2 level 4,G07,B97,GRID,Truyền tải điện và MBA,Quá áp lưới
+APU/error/98,APU,error,98,Overvoltage VL3 level 4,G07,B98,GRID,Truyền tải điện và MBA,Quá áp lưới
+APU/error/99,APU,error,99,Overvoltage mean level 1,G07,B99,GRID,Truyền tải điện và MBA,Quá áp lưới
+APU/error/100,APU,error,100,Overtemperature Control Card SW,G01,B100,CONTROL,"Bộ điều khiển (control card, APMC)",Quá nhiệt control card
+APU/error/101,APU,error,101,Wrong version control card,G09,B101,CONTROL,"Bộ điều khiển (control card, APMC)","Sai loại / phiên bản control module, firmware"
+APU/error/102,APU,error,102,Voltage measurement Island grid.,G09,B102,GRID,Truyền tải điện và MBA,Lưới cô lập
+APU/error/103,APU,error,103,Unbalanced grid voltage,G07,B103,GRID,Truyền tải điện và MBA,Mất cân bằng áp / góc pha / dòng
+APU/error/104,APU,error,104,Unbalanced phase angle,G07,B104,GRID,Truyền tải điện và MBA,Mất cân bằng áp / góc pha / dòng
+APU/error/105,APU,error,105,Unbalanced grid current,G04,B105,GRID,Truyền tải điện và MBA,Mất cân bằng áp / góc pha / dòng
+APU/error/106,APU,error,106,Overcurrent Idc SW pos,G04,B106,DC,"Phía DC (PV, DC-link)",Quá dòng
+APU/error/107,APU,error,107,Overcurrent Idc SW neg,G04,B107,DC,"Phía DC (PV, DC-link)",Quá dòng
+APU/error/108,APU,error,108,Undervoltage VL1 level 3,G07,B108,GRID,Truyền tải điện và MBA,Thiếu áp lưới
+APU/error/109,APU,error,109,Undervoltage VL2 level 3,G07,B109,GRID,Truyền tải điện và MBA,Thiếu áp lưới
+APU/error/110,APU,error,110,Undervoltage VL3 level 3,G07,B110,GRID,Truyền tải điện và MBA,Thiếu áp lưới
+APU/error/111,APU,error,111,Discharge Udc pos,G12,B111,DC,"Phía DC (PV, DC-link)",Xả tụ
+APU/error/112,APU,error,112,Discharge Udc neg,G12,B112,DC,"Phía DC (PV, DC-link)",Xả tụ
+APU/error/113,APU,error,113,Wrong Op mode for overcurrent test,G09,B113,CONTROL,"Bộ điều khiển (control card, APMC)","Sai cấu hình, chế độ, cấp phép, đang cập nhật"
+APU/error/114,APU,error,114,Wrong variant to Uac nom,G09,B114,CONTROL,"Bộ điều khiển (control card, APMC)","Sai cấu hình, chế độ, cấp phép, đang cập nhật"

@@ -1,0 +1,20 @@
+[project]
+name = "sinacon-pv-diagnosis"
+version = "1.0.0"
+description = "Kiểm chứng và chẩn đoán cảnh báo lỗi biến tần Siemens SINACON PV từ log vận hành"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.26", "pandas>=2.2", "openpyxl>=3.1", "xlrd>=2.0"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

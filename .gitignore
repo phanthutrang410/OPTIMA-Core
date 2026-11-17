@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+# dữ liệu và kết quả không đưa vào repo
+data/
+results/
+*.pkl
+*.xlsx
+*.xls
+*.zip
+!config/*.csv
