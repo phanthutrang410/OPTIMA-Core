@@ -16,17 +16,29 @@ from sinacon import tier1, windows
 from sinacon.config import code_device, fault_codes
 from sinacon.daily_log import INVERTER_DIR_RE, LOG_RE, iter_log_files, parse_trigger_records
 
+# loại dòng -> (các cột chính, mô hình hiện tại, có thể dùng cho). Tên cột lấy từ dòng tiêu đề trong log;
+# "(?)" = ý nghĩa đoán theo ký hiệu, chưa có tài liệu Siemens xác nhận.
 RECORD_MEANING = {
-    "APU Stat Trig": ("Trạng thái (OpState) và mã lỗi từng APU, ghi mỗi khi có thay đổi", "DÙNG"),
-    "APS Stat Trig": ("Trạng thái, mã lỗi và warning của cả tủ, ghi mỗi khi có thay đổi", "DÙNG"),
-    "APU Stat 60s": ("Nhiệt độ cuộn cảm (TInd) và IGBT (TL1–TL3) từng APU, mỗi phút", "DÙNG"),
-    "APU Stat 10s": ("Điện áp, dòng, công suất từng APU, mỗi 10 giây", "không dùng"),
-    "APU Ctrl Trig": ("Lệnh điều khiển gửi xuống APU", "không dùng"),
-    "APU Energy": ("Điện năng từng APU", "không dùng"),
-    "APS Stat 60s": ("Số đo cả tủ mỗi phút", "không dùng"),
-    "APS Energy": ("Điện năng cả tủ", "không dùng"),
-    "APS Ctrl Trig": ("Lệnh điều khiển cả tủ", "không dùng"),
-    "APS Switching Cycles": ("Số lần đóng cắt quạt, bơm", "không dùng"),
+    "APU Stat Trig": ("OpState, Error1–8 của từng APU; ghi khi có thay đổi (có mili giây)",
+                      "ĐANG DÙNG", "mã B, APU có ngắt không"),
+    "APS Stat Trig": ("OpState, Error1–8, Warning1–8 của cả tủ; ghi khi có thay đổi",
+                      "ĐANG DÙNG", "mã A, warning chế độ tay/bảo trì"),
+    "APU Stat 60s": ("TInd cuộn cảm, TL1–TL3 IGBT 3 pha, TPCB nhiệt bo mạch, Hum độ ẩm; mỗi phút",
+                     "ĐANG DÙNG (TInd, TL1–3)", "Quá nhiệt IGBT, cuộn cảm; TPCB, Hum cho Môi trường tủ"),
+    "APU Stat 10s": ("Điện áp, dòng, P, Q 3 pha phía AC; tần số; Vdc, Idc, Pdc phía DC; mỗi 10 giây",
+                     "chưa dùng – nên xét", "APU có tụt công suất không; Phía DC (Vdc), Truyền tải-MBA (áp, f)"),
+    "APS Stat 60s": ("Tamb nhiệt trong tủ, Ttrans (?), Riso điện trở cách điện, Cleak điện dung rò; mỗi phút",
+                     "chưa dùng – nên xét", "Cách điện (Riso, Cleak), Môi trường tủ (Tamb)"),
+    "APS Stat 10s": ("Irr = bức xạ mặt trời (W/m²); chỉ có dòng tiêu đề, KHÔNG có số đo (tủ 9.3, tháng 8)",
+                     "không có dữ liệu", "nếu có số đo: thay quy tắc giờ 08:00–16:30 khi xét bức xạ thấp"),
+    "APU Ctrl Trig": ("Lệnh gửi xuống APU: P, Q đặt từng pha, OpMode, giới hạn Vdc/Idc; ghi khi đổi",
+                      "chưa dùng", "biết APU bị ra lệnh giảm/tắt (không phải hỏng)"),
+    "APS Ctrl Trig": ("Trạng thái quạt/điều hòa, bơm nước, sưởi, hút ẩm, lệnh bật APU 1–6, Enable; ghi khi đổi",
+                      "chưa dùng", "Môi trường tủ (làm mát), Đóng cắt (Enable)"),
+    "APU Energy": ("Bộ đếm điện tích (Ah) theo 12 kênh, chiều dương/âm (?)", "chưa dùng", "chưa rõ"),
+    "APS Energy": ("Điện năng vào/ra (kWh) cộng dồn của từng APU và cả tủ", "chưa dùng", "sản lượng; kiểm tra chéo"),
+    "APS Switching Cycles": ("Số lần đóng cắt phía AC và DC của từng APU (cộng dồn)",
+                             "chưa dùng", "Đóng cắt-bảo vệ: contactor/máy cắt đóng cắt nhiều"),
 }
 DEVICE_ORDER = ["IGBT", "DRIVER", "BOOSTER", "DC", "INDUCTOR", "INSULATION", "ENCLOSURE", "CONTROL", "SWITCHGEAR",
                 "GRID", "OPERATION"]
@@ -164,8 +176,9 @@ def record_types(cab_dir: Path, day: str | None = None) -> pd.DataFrame:
     """Các loại dòng trong một file log ngày: số dòng, ý nghĩa, có dùng không."""
     name, text = _first_file(cab_dir, day)
     n = Counter(line.split(";", 1)[0] for line in text.splitlines() if ";" in line)
-    t = pd.DataFrame([(k, v, *RECORD_MEANING[k]) for k, v in n.most_common() if k in RECORD_MEANING],
-                     columns=["loai_dong", "so_dong", "y_nghia", "mo_hinh"])
+    t = pd.DataFrame([(k, v, *RECORD_MEANING.get(k, ("loại dòng chưa biết", "chưa dùng", "")))
+                      for k, v in n.most_common() if k[:3] in ("APU", "APS")],
+                     columns=["loai_dong", "so_dong", "cot_chinh", "mo_hinh_hien_tai", "co_the_dung_cho"])
     t.attrs["file"] = name
     return t
 
