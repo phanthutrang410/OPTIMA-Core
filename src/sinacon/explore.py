@@ -84,6 +84,56 @@ def find_log_root(drive: Path, link: str, sub: str) -> Path:
     raise FileNotFoundError(f"Không thấy '{sub}'. Kiểm tra đã thêm lối tắt thư mục dữ liệu vào Drive của tôi chưa.")
 
 
+# Lựa chọn trong notebook -> (nơi tìm, tên thư mục, tên thư mục kết quả). "data": dưới thư mục dữ liệu nhóm (DATA_LINK);
+# "any": tìm theo tên ở mọi chỗ trong Drive đã kết nối; "mine": thư mục riêng trong Drive của tôi.
+PERIODS = {
+    "Tháng 1–3/2026 (12/01–12/03)": ("mine", "SINACON_so_loi/log_goc/thang_1_3", "thang_1_3"),
+    "Tháng 4–6/2026 (04/04–03/06)": ("any", "4-4-2026-6-4-2026", "thang_4_6"),
+    "Tháng 6–8/2026 (13/06–13/08)": ("any", "6-13-2026-8-13-2026", "thang_6_8"),
+    "Tháng 8/2026": ("data", "Log file/08_2026", "thang_8"),
+    "Tháng 9/2026": ("data", "Log file/September 2026", "thang_9"),
+    "Tháng 10/2026": ("data", "Log file/10_2026", "thang_10"),
+}
+
+
+def _find_by_name(bases: list[Path], name: str, max_depth: int = 5) -> Path | None:
+    for base in bases:
+        if not base.is_dir():
+            continue
+        for d, subdirs, _ in os.walk(base):
+            if name in subdirs:
+                folder = Path(d) / name
+                for sub in ("processed data", "inprocessing"):   # có thư mục đã xử lý thì dùng nó
+                    if (folder / sub).is_dir():
+                        return folder / sub
+                return folder
+            if len(Path(d).relative_to(base).parts) >= max_depth:
+                subdirs[:] = []
+            subdirs[:] = [s for s in subdirs if not s.startswith(".") or base.name == ".shortcut-targets-by-id"]
+    return None
+
+
+def find_period(drive: Path, link: str, choice: str) -> Path:
+    """Thư mục log của lựa chọn `choice` (khóa của PERIODS)."""
+    drive = Path(drive)
+    where, sub, _ = PERIODS[choice]
+    if where == "data":
+        return find_log_root(drive, link, sub)
+    if where == "mine":
+        p = drive / "MyDrive" / sub
+        if p.is_dir():
+            return p
+        raise FileNotFoundError(f"Chưa có {p}. Tháng 1–3 trên Drive nhóm chỉ có dạng bảng tách; bản log ngày được "
+                                "dựng lại bằng SINACON_colab.ipynb (ô 2b, giai đoạn thang_1_3).")
+    fid = link.rstrip("/").split("folders/")[-1].split("?")[0]
+    found = _find_by_name([drive / ".shortcut-targets-by-id" / fid, drive / "MyDrive",
+                           drive / ".shortcut-targets-by-id", drive / "Shareddrives"], sub)
+    if found is None:
+        raise FileNotFoundError(f"Không thấy thư mục '{sub}'. Nếu nó chỉ nằm ở 'Được chia sẻ với tôi': chuột phải "
+                                "thư mục Inv_log -> Sắp xếp -> Thêm lối tắt -> Drive của tôi, rồi chạy lại ô 2.")
+    return found
+
+
 def find_cabinet(root: Path, inverter: str) -> Path:
     """Thư mục log của tủ `inverter` (vd "9.3") dưới root; tên thư mục có thể là "9.3", "INV 9.3", "inv 9.3"."""
     for d, subdirs, _ in os.walk(root):
