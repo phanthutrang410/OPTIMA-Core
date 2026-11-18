@@ -44,27 +44,36 @@ DEVICE_ORDER = ["IGBT", "DRIVER", "BOOSTER", "DC", "INDUCTOR", "INSULATION", "EN
                 "GRID", "OPERATION"]
 
 
+# OpState của APU theo manual SINACON PV 01/2020, tr. 212–213 (bảng "inverter subunit").
+# 20 không có trong manual; thấy ngay trước 30 khi bộ điều khiển khởi động lại.
+# OpState của cả tủ (APS) ghi trong log là 20000, cũng không có trong manual.
+OPSTATE = {
+    0: "Tiết kiệm năng lượng (bộ điều khiển APU tắt)", 20: "Bộ điều khiển khởi động lại (20, ngoài manual)",
+    30: "Bộ điều khiển đang khởi động (booting)", 50: "Tắt (PWM tắt, AC và DC hở)",
+    100: "Chuẩn bị nối DC", 130: "Chờ nối DC", 160: "Nạp trước phía DC", 200: "Đã nối DC (PWM tắt, AC hở)",
+    300: "Đang thử nối AC (chờ áp, tần số lưới)", 330: "Chuẩn bị nối AC", 360: "Chờ nối AC", 400: "Nạp trước phía AC",
+    500: "Đã nối AC nhưng PWM tắt: KHÔNG phát", 600: "Đã nối AC, lưới cô lập",
+    3000: "Đang phát (MPPT)", 3010: "Đang phát, giới hạn công suất AC", 3020: "Đang phát, giới hạn dòng AC",
+    3030: "Đang phát, giới hạn áp DC", 3040: "Đang phát (MPPT dò lên)", 3050: "Đang phát (MPPT dò xuống)",
+    3060: "Đang phát (MPPT chu kỳ)", 3070: "PWM tắt 1 phút vì dòng DC thấp", 4000: "Lưới cô lập: khởi động",
+    4100: "Lưới cô lập: sẵn sàng", 10000: "Chế độ thử (chỉ cho người bảo trì)",
+}
+
+
 def opstate_label(s) -> str:
     s = int(s)
-    if s in (3010, 3020, 3030):
-        return "Đang phát, giới hạn công suất"
-    if s >= 3000:
-        return "Đang phát điện"
-    if s == 500:
-        return "Bảo vệ tác động, chờ chạy lại"
-    if s in (30, 50):
-        return "Tắt"
-    return "Đang khởi động / chuyển trạng thái"
+    return OPSTATE.get(s, f"{s} (không có trong manual)")
 
 
 LEVELS = [0, 1, 2, 3, 3.6]
-LEVEL_NAMES = ["Tắt (30, 50)", "Bảo vệ tác động (500)", "Khởi động / chờ", "Phát giới hạn (3010–3030)", "Phát điện (3000)"]
+LEVEL_NAMES = ["Tắt / khởi động lại (0–50)", "Nối AC, không phát (500)", "Đang nối DC/AC (100–400)",
+               "Phát giới hạn (3010–3030)", "Phát điện (3000…)"]
 
 
 def opstate_level(s: pd.Series) -> pd.Series:
-    """OpState -> mức vẽ: 0 tắt, 1 bảo vệ, 2 khởi động, 3 phát giới hạn, 3,6 phát."""
+    """OpState -> mức vẽ: 0 tắt/khởi động lại, 1 nối AC không phát, 2 đang nối, 3 phát giới hạn, 3,6 phát."""
     s = s.astype(int)
-    return pd.Series(np.select([s.isin([30, 50]), s == 500, s.isin([3010, 3020, 3030]), s >= 3000],
+    return pd.Series(np.select([s <= 50, s == 500, s.isin([3010, 3020, 3030, 3070]), s >= 3000],
                                [0, 1, 3, 3.6], default=2), index=s.index)
 
 
