@@ -2,8 +2,8 @@
 
 Hậu quả điện, từ chuỗi OpState s_a(t) của APU a (manual mục 9.1):
     F_a(t) = 1[s_a(t) ≥ 3000]                                   APU đang phát
-    F_a⁻   = F_a(t0 − 2′)
-    N_a    = F_a⁻ · 1[∃ t ∈ [t0 − 2′, t0 + 10′]: F_a(t) = 0]     APU ngắt quanh cảnh báo
+    F_a⁻   = F_a(t0 − 1′)
+    N_a    = F_a⁻ · 1[∃ t ∈ [t0 − 1′, t0 + 10′]: F_a(t) = 0]     APU ngắt quanh cảnh báo
     E      = Σ_a ∫_{t0}^{t0+60′} F_a⁻ (1 − F_a(t)) dt            thời lượng ngừng phát (APU·phút)
     3010–3030: đang phát nhưng giới hạn công suất (giảm tải).
 
@@ -14,7 +14,7 @@ manual ghi 95 °C nhưng mọi lần bảo vệ cuộn cảm tác động trong 
     h ≤ Δh: nhiệt tới ngưỡng. |ΔT/Δt| > 15 °C/phút hoặc T ngoài [−20, 200] °C: cảm biến phi vật lý.
 
 Quy tắc, xét theo thứ tự (dừng ở quy tắc đầu tiên thỏa):
-    1. không APU nào phát lúc t0 − 2′                            -> giữ kết luận đầu vào (mặc định: thật)
+    1. không APU nào phát lúc t0 − 1′                            -> giữ kết luận đầu vào (mặc định: thật)
     2. mã không phải nhiệt, có APU không phát suốt [t0 − 180′, t0 + 30′] trong khi APU khác phát, không có ngắt mới
                                                                 -> thật, APU hỏng/tách kéo dài
     3. ngoài 08:00–16:30, mọi APU bị ngắt về thẳng Off (50), không APU nào phát lại trong 30′, không có mã phần cứng
@@ -41,7 +41,7 @@ from sinacon.windows import load_windows
 FEED = 3000
 LIMITED = {3010, 3020, 3030}
 OFF = 50                                   # dừng có điều khiển (500 = bảo vệ tác động, chờ phát lại)
-PRE_MIN, POST_MIN, ENERGY_MIN = 2, 10, 60
+PRE_MIN, POST_MIN, ENERGY_MIN = 1, 10, 60   # PRE_MIN: người dùng chọn 1 phút (2026-11-19), trước là 2
 SHORT_TRIP_E = 10.0                        # APU·phút
 OUT_BEFORE_MIN, OUT_AFTER_MIN = 180, 30    # cửa sổ xét APU hỏng/tách kéo dài
 RESUME_MIN = 30
@@ -87,7 +87,7 @@ def electrical(tr: pd.DataFrame, t0: pd.Timestamp) -> dict:
     resumed = any((w30[(w30["System"] == a) & (w30["t"] > t0)]["OpState"] >= FEED).any() for a in tripped)
     all_off = bool(tripped) and all(x == OFF for x in first_off) and not resumed
     # APU hỏng/tách kéo dài: không phát lúc nào trong [t0 − 180′, t0 + 30′] (kể cả APU không còn ghi log) trong khi
-    # ít nhất một APU khác của tủ đang phát lúc t0 − 2′.
+    # ít nhất một APU khác của tủ đang phát lúc t0 − 1′.
     h0 = t0 - pd.Timedelta(minutes=OUT_BEFORE_MIN)
     wh = tr[(tr["t"] > h0) & (tr["t"] <= t0 + pd.Timedelta(minutes=OUT_AFTER_MIN))]
     ever = {a for a, s in state_at(tr, h0).items() if s >= FEED} | set(wh.loc[wh["OpState"] >= FEED, "System"])
