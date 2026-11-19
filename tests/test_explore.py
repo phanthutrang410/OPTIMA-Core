@@ -64,3 +64,17 @@ def test_find_log_root_skips_own_output_folders(tmp_path):
     (real / "TUYEN 9" / "INV 9.3").mkdir(parents=True)
     assert explore.find_log_root(tmp_path, "https://drive.google.com/drive/folders/NONE", "Log file/10_2026") == real
     assert list(explore.list_files(real).columns) == ["file", "ngay", "MB"]
+
+
+def test_gap_choice_and_warning_offsets():
+    t = pd.to_datetime(["2026-08-14 10:00:00", "2026-08-14 10:00:01", "2026-08-14 10:00:20", "2026-08-14 14:00:00",
+                        "2026-08-14 14:00:05"])
+    errors = pd.DataFrame({"scope": "APU", "unit": 3, "t": t, "opstate": 500,
+                           "codes": [(32,), (32, 33), (), (3,), ()]})
+    tab, gaps = explore.gap_choice(errors)
+    assert tab.set_index("gom_neu_cach_duoi_phut").loc[5, "so_su_co"] == 2
+    assert tab.set_index("gom_neu_cach_duoi_phut").loc[0, "so_su_co"] == 2
+    warnings = pd.DataFrame({"t": pd.to_datetime(["2026-08-14 10:00:30", "2026-08-14 11:00:00", "2026-08-14 13:59:50"]),
+                             "codes": [frozenset({24}), frozenset(), frozenset({24})]})
+    o = explore.warning_offsets(errors, warnings)
+    assert list(o["giay"]) == [30.0, -10.0]

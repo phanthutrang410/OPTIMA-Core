@@ -368,6 +368,111 @@ def plot_day(cab_dir: Path, errors: pd.DataFrame, events: pd.DataFrame, day: str
     return fig
 
 
+# ------------------------------------------------------------------ vì sao chọn các khoảng thời gian
+GAP_CHOICES_MIN = (0, 0.5, 1, 2, 5, 10, 15, 30, 60)
+
+
+def gap_choice(errors: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
+    """Số sự cố khi gom với từng ngưỡng (GAP_CHOICES_MIN) và khoảng cách (phút) từ lúc nhóm mã trước tắt
+    tới lúc mã kế tiếp bật. Dùng để thấy vì sao chọn INCIDENT_GAP."""
+    from datetime import timedelta
+    eps = inc_mod.code_episodes(errors)
+    keep = inc_mod.INCIDENT_GAP
+    rows = []
+    try:
+        for m in GAP_CHOICES_MIN:
+            inc_mod.INCIDENT_GAP = timedelta(minutes=m)
+            rows.append((m, inc_mod.group_incidents(eps).nunique()))
+    finally:
+        inc_mod.INCIDENT_GAP = keep
+    gaps, cur = [], None
+    for s, e in zip(eps["start"], eps["end"].fillna(eps["start"])):
+        if cur is not None and s > cur:
+            gaps.append((s - cur).total_seconds() / 60)
+        cur = e if cur is None else max(cur, e)
+    return pd.DataFrame(rows, columns=["gom_neu_cach_duoi_phut", "so_su_co"]), pd.Series(gaps, name="phut")
+
+
+def plot_gap_choice(errors: pd.DataFrame):
+    """Trái: số sự cố theo ngưỡng gom. Phải: mã kế tiếp bật cách nhóm trước bao lâu."""
+    import matplotlib.pyplot as plt
+    tab, gaps = gap_choice(errors)
+    chosen = inc_mod.INCIDENT_GAP.total_seconds() / 60
+    fig, ax = plt.subplots(1, 2, figsize=(13, 4.2))
+    x = range(len(tab))
+    ax[0].plot(x, tab["so_su_co"], "o-")
+    for i, (m, n) in enumerate(tab.itertuples(index=False)):
+        ax[0].annotate(str(n), (i, n), textcoords="offset points", xytext=(0, 6), ha="center", fontsize=8)
+    ax[0].set_xticks(list(x), [f"{m:g}" for m in tab["gom_neu_cach_duoi_phut"]])
+    i5 = list(tab["gom_neu_cach_duoi_phut"]).index(chosen) if chosen in GAP_CHOICES_MIN else None
+    if i5 is not None:
+        ax[0].axvline(i5, color="red", ls="--", label=f"đang dùng: {chosen:g} phút")
+    ax[0].set_xlabel("gom các mã bật cách nhau dưới … phút")
+    ax[0].set_ylabel("số sự cố")
+    ax[0].set_title("Khoảng gom càng rộng → càng ít sự cố.\nChọn chỗ đường gần nằm ngang: chuỗi đã gom xong, chưa gộp nhầm")
+    ax[0].legend(fontsize=8)
+    bins = [0, 0.5, 1, 2, 5, 10, 15, 30, 60, 180, np.inf]
+    labels = ["≤0,5", "0,5–1", "1–2", "2–5", "5–10", "10–15", "15–30", "30–60", "1–3 h", ">3 h"]
+    cnt = pd.cut(gaps, bins, labels=labels).value_counts().reindex(labels)
+    colors = ["tab:blue" if b <= chosen else "tab:gray" for b in bins[1:]]
+    ax[1].bar(labels, cnt.values, color=colors)
+    for i, v in enumerate(cnt.values):
+        ax[1].text(i, v, str(v), ha="center", va="bottom", fontsize=8)
+    ax[1].set_xlabel("mã kế tiếp bật sau khi nhóm trước tắt (phút)")
+    ax[1].set_ylabel("số lần")
+    ax[1].set_title(f"Xanh = bị gom vào sự cố trước (cách < {chosen:g} phút); xám = thành sự cố mới")
+    ax[1].tick_params(axis="x", labelsize=8)
+    fig.tight_layout()
+    return fig, tab
+
+
+def warning_offsets(errors: pd.DataFrame, warnings: pd.DataFrame) -> pd.DataFrame:
+    """Mỗi lần warning bật: cách t0 của sự cố gần nhất bao nhiêu giây (âm = trước t0)."""
+    from sinacon.daily_log import warning_activations
+    eps = inc_mod.code_episodes(errors)
+    eps["inc"] = inc_mod.group_incidents(eps)
+    t0 = np.sort(eps.groupby("inc")["start"].min().to_numpy())
+    on = warning_activations(warnings)
+    if not len(t0) or on.empty:
+        return pd.DataFrame(columns=["giay", "code"])
+    t = on["t"].to_numpy()
+    k = np.clip(np.searchsorted(t0, t), 1, len(t0) - 1) if len(t0) > 1 else np.zeros(len(t), int)
+    cand = np.stack([t0[k - 1 if len(t0) > 1 else k], t0[k]])
+    d = (t[None, :] - cand) / np.timedelta64(1, "s")
+    pick = np.abs(d).argmin(axis=0)
+    return pd.DataFrame({"giay": d[pick, np.arange(len(t))], "code": on["code"].to_numpy()})
+
+
+def plot_warning_window(errors: pd.DataFrame, warnings: pd.DataFrame):
+    """Mật độ warning bật (lần/giây) theo thời gian so với t0; vùng tô = cửa sổ đang dùng."""
+    import matplotlib.pyplot as plt
+    o = warning_offsets(errors, warnings)
+    before, after = inc_mod.WARN_BEFORE.total_seconds(), inc_mod.WARN_AFTER.total_seconds()
+    edges = np.array([-300, -120, -60, -30, -10, 0, 10, 30, 60, 90, 120, 300])
+    cnt, _ = np.histogram(o["giay"], edges)
+    rate = cnt / np.diff(edges)
+    far = (o["giay"].abs() > 600).sum()
+    fig, ax = plt.subplots(figsize=(13, 4.2))
+    ax.stairs(rate, edges, fill=True, alpha=0.6, label="số warning bật mỗi giây")
+    ax.axvspan(-before, after, color="red", alpha=0.12, label=f"cửa sổ đang dùng: −{before:g} s … +{after:g} s")
+    ax.axvline(0, color="k", lw=1)
+    ax.text(0, rate.max() * 1.02, " t0 = lúc mã lỗi đầu tiên bật", fontsize=8)
+    ax.set_xlabel("thời gian so với t0 (giây; âm = trước t0)")
+    ax.set_ylabel("lần / giây")
+    ax.set_title("Warning dồn lại ngay quanh t0 rồi thưa dần: lấy cửa sổ bao phần dày, bỏ phần đã về mức thường")
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    inside = o[(o["giay"] >= -before) & (o["giay"] <= after)]
+    names = fault_codes().set_index("code_key")["name"]
+    top = lambda s: (s.value_counts().head(6).rename_axis("warning").reset_index(name="so_lan")
+                     .assign(ten=lambda x: x["warning"].map(names)))
+    summary = pd.DataFrame({"khoang_giay": [f"{a:g}…{b:g}" for a, b in zip(edges[:-1], edges[1:])],
+                            "so_lan": cnt, "lan_moi_giay": rate.round(2)})
+    print(f"{len(o)} lần warning bật; {len(inside)} lần ({len(inside) / max(len(o), 1):.0%}) rơi vào cửa sổ; "
+          f"{far} lần cách sự cố gần nhất hơn 10 phút (chuyện riêng).")
+    return fig, summary, top(inside["code"]), top(o.loc[o["giay"].abs() > 600, "code"])
+
+
 # ------------------------------------------------------------------ các bước mô hình
 def incidents_of(cab_dir: Path, inverter: str) -> pd.DataFrame:
     t = inc_mod.incidents_of_cabinet(cab_dir, inverter)
