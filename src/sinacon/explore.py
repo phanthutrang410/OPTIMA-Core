@@ -216,6 +216,9 @@ def device_table() -> pd.DataFrame:
 
 
 def read_cabinet(cab_dir: Path) -> tuple[str, pd.DataFrame, pd.DataFrame]:
+    if next(iter_log_files(cab_dir), None) is None:
+        print(f"!!! Thư mục tủ có nhưng KHÔNG có file log nào (APS-xxxxxx_YYYYMMDD_hhmmss.csv): {cab_dir}\n"
+              "    Có thể tủ này không có log ở đợt đã chọn, hoặc Drive bị ngắt: chạy lại ô 1, 2, 3.")
     return parse_trigger_records(cab_dir)
 
 
