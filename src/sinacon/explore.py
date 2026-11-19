@@ -506,14 +506,13 @@ def step_a(inc: pd.DataFrame, cab_dir: Path, inverter: str, out_dir: Path) -> pd
     (out_dir / f"windows_{inverter}.pkl").unlink(missing_ok=True)
     print(windows.extract_cabinet(inverter, cab_dir, np.sort(pd.to_datetime(inc["t0"]).to_numpy()), out_dir))
     t = tier1.run(inc, out_dir)
-    t["ket_luan"] = t["tier1_verdict"].map({"real": "THẬT", "false": "GIẢ"})
+    t["ket_luan"] = t["tier1_verdict"].map({"real": "THẬT", "false": "GIẢ", "skip": "KHÔNG XÉT"})
     t["quy_tac"] = t["tier1_class"].map({**tier1.CLASS_LABEL,
                                          "kept_prior": "Chưa đủ căn cứ: tạm để thật",
-                                         "not_feeding": "Tủ không phát lúc t0: tạm để thật"})
+                                         "not_feeding": "Không xét: tủ không phát lúc t0"})
     t["ly_do"] = t["tier1_reason"].fillna("")
     t.loc[(t["tier1_class"] == "not_feeding") & (t["ly_do"] == ""), "ly_do"] = (
-        "Lúc t0 không APU nào đang phát (đêm, hoặc tủ đã dừng từ trước): không đo được hậu quả; chưa có kết luận "
-        "nào khác nên tạm để THẬT.")
+        "Không APU nào đang phát 1 phút trước t0 (đêm, hoặc tủ đã dừng từ trước): không xem được hậu quả, không xét.")
     t.loc[(t["tier1_class"] == "kept_prior") & (t["ly_do"] == ""), "ly_do"] = (
         "Không APU nào ngắt và mã không phải mã nhiệt: Bước A không đủ căn cứ gọi là giả; tạm để THẬT.")
     return t

@@ -14,7 +14,7 @@ manual ghi 95 °C nhưng mọi lần bảo vệ cuộn cảm tác động trong 
     h ≤ Δh: nhiệt tới ngưỡng. |ΔT/Δt| > 15 °C/phút hoặc T ngoài [−20, 200] °C: cảm biến phi vật lý.
 
 Quy tắc, xét theo thứ tự (dừng ở quy tắc đầu tiên thỏa):
-    1. không APU nào phát lúc t0 − 1′                            -> giữ kết luận đầu vào (mặc định: thật)
+    1. không APU nào phát lúc t0 − 1′ (đêm, tủ đã dừng)            -> KHÔNG XÉT (verdict "skip"; người dùng chọn 2026-11-19)
     2. mã không phải nhiệt, có APU không phát suốt [t0 − 180′, t0 + 30′] trong khi APU khác phát, không có ngắt mới
                                                                 -> thật, APU hỏng/tách kéo dài
     3. ngoài 08:00–16:30, mọi APU bị ngắt về thẳng Off (50), không APU nào phát lại trong 30′, không có mã phần cứng
@@ -63,7 +63,7 @@ CLASS_LABEL = {
     "sensor_jump": "Giả: cảm biến nhiệt nhảy phi vật lý", "temp_far_from_limit": "Giả: nhiệt xa ngưỡng, không ngắt",
     "no_temp_data": "Giả: không có số đo nhiệt, không ngắt", "no_trip": "Giả: không APU nào ngắt",
     "low_irradiance_stop": "Giả: dừng do bức xạ thấp (đầu/cuối ngày)",
-    "not_feeding": "Tủ không phát: giữ kết luận đầu vào", "kept_prior": "Giữ kết luận đầu vào",
+    "not_feeding": "Không xét: không APU nào đang phát", "kept_prior": "Giữ kết luận đầu vào",
 }
 
 
@@ -138,14 +138,15 @@ def thermal(temp: pd.DataFrame | None, t0: pd.Timestamp, apus: list[str], codes:
 def decide(is_thermal: bool, el: dict, th: dict, t0: pd.Timestamp | None = None,
            temp_code: bool | None = None, hardware_code: bool = False,
            prior_verdict: str = "real", prior_reason: str = "") -> tuple[str, str, str]:
-    """(verdict "real"/"false", lớp quyết định, căn cứ).
+    """(verdict "real"/"false"/"skip", lớp quyết định, căn cứ). "skip" = không xét (tủ không phát lúc t0).
 
     temp_code: có mã bảo vệ theo nhiệt độ (APU error 1–4); mặc định = is_thermal.
     hardware_code: có mã phần cứng công suất (ô quá dòng / hỏng driver của bảng hai tầng)."""
     if temp_code is None:
         temp_code = is_thermal
     if not el or not el.get("n_feed"):
-        return ("false" if prior_verdict == "false" else "real"), "not_feeding", prior_reason
+        return ("skip", "not_feeding", "Không APU nào đang phát 1 phút trước t0 (ban đêm hoặc tủ đã dừng): "
+                "không xem được hậu quả, không xét.")
     if not temp_code and el.get("n_apu_out", 0) > 0 and not (el["n_trip"] > 0 and not el.get("all_to_off")):
         return ("real", "apu_out_of_service",
                 f"{el['n_apu_out']} APU không phát suốt 3 giờ trước tới 30 phút sau cảnh báo trong khi APU khác của tủ "

@@ -53,9 +53,10 @@ def test_temperature_far_from_limit_and_sensor_jump_are_false():
     assert jump["nonphysical"] and tier1.decide(True, el, jump)[1] == "sensor_jump"
 
 
-def test_cabinet_not_feeding_keeps_prior():
+def test_cabinet_not_feeding_is_skipped():
     el = tier1.electrical(trig(feeding_since_morning(state=200)), T0)
-    assert tier1.decide(True, el, {}, prior_verdict="false")[:2] == ("false", "not_feeding")
+    assert tier1.decide(True, el, {}, prior_verdict="false")[:2] == ("skip", "not_feeding")
+    assert tier1.decide(False, el, {})[:2] == ("skip", "not_feeding")
 
 
 def test_low_irradiance_shutdown_is_not_a_trip():
