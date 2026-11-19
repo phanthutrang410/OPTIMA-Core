@@ -444,41 +444,51 @@ def warning_offsets(errors: pd.DataFrame, warnings: pd.DataFrame) -> pd.DataFram
 
 
 def plot_warning_window(errors: pd.DataFrame, warnings: pd.DataFrame):
-    """Mật độ warning bật (lần/giây) theo thời gian so với t0; vùng tô = cửa sổ đang dùng."""
+    """Trái: warning bật mỗi giây quanh t0 ("mưa rào" quanh sự cố, "mưa phùn" ở xa).
+    Phải: cửa sổ sau t0 dài A giây gắn bao nhiêu warning và bao nhiêu trong đó là ngẫu nhiên."""
     import matplotlib.pyplot as plt
-    o = warning_offsets(errors, warnings)
-    before, after = inc_mod.WARN_BEFORE.total_seconds(), inc_mod.WARN_AFTER.total_seconds()
-    edges = np.array([-300, -120, -60, -30, -10, 0, 10, 30, 60, 90, 120, 300])
-    cnt, _ = np.histogram(o["giay"], edges)
-    rate = cnt / np.diff(edges)
-    far = (o["giay"].abs() > 600).sum()
-    fig, ax = plt.subplots(figsize=(13, 4.2))
-    ax.stairs(rate, edges, fill=True, alpha=0.6, label="số warning bật mỗi giây")
     from sinacon import calibrate as cal
     r = cal.RULE
-    b_here, a_here, base = cal.choose_warning_window(o["giay"].to_numpy(float), r["bin_s"], r["max_s"], r["far_s"],
-                                                     r["k_background"])
-    ax.axvspan(-before, after, color="red", alpha=0.12,
-               label=f"cửa sổ đang dùng (công thức trên đợt 04–06): −{before:g} s … +{after:g} s")
-    ax.axhline(r["k_background"] * base, color="k", ls=":", lw=1,
-               label=f"{r['k_background']:g} × mức nền của tủ này (xa sự cố {r['far_s'][0]}–{r['far_s'][1]} s)")
-    ax.axvline(0, color="k", lw=1)
-    ax.text(0, rate.max() * 1.02, " t0 = lúc mã lỗi đầu tiên bật", fontsize=8)
-    ax.set_xlabel("thời gian so với t0 (giây; âm = trước t0)")
-    ax.set_ylabel("lần / giây")
-    ax.set_title("Warning dồn lại ngay quanh t0 rồi thưa dần: lấy cửa sổ bao phần dày, bỏ phần đã về mức thường")
-    ax.legend(fontsize=8)
+    o = warning_offsets(errors, warnings)
+    d = o["giay"].to_numpy(float)
+    before, after = inc_mod.WARN_BEFORE.total_seconds(), inc_mod.WARN_AFTER.total_seconds()
+    b_here, a_here, base = cal.choose_warning_window(d, r["max_random_share"], r["far_s"], r["max_s"])
+    edges = np.array([-300, -120, -60, -30, -10, 0, 10, 30, 60, 90, 120, 300])
+    cnt, _ = np.histogram(d, edges)
+    rate = cnt / np.diff(edges)
+    fig, ax = plt.subplots(1, 2, figsize=(14, 4.3))
+    ax[0].stairs(rate, edges, fill=True, alpha=0.6, label="warning bật mỗi giây")
+    ax[0].axhline(base, color="k", ls=":", lw=1.2,
+                  label=f"mức nền (đo ở xa sự cố {r['far_s'][0]}–{r['far_s'][1]} s) = {base:.2f}/giây")
+    ax[0].axvspan(-before, after, color="red", alpha=0.12, label=f"cửa sổ đang dùng −{before:g} … +{after:g} s")
+    ax[0].axvline(0, color="k", lw=1)
+    ax[0].set_xlabel("giây so với t0 (âm = trước t0)"); ax[0].set_ylabel("lần / giây")
+    ax[0].set_title("Mưa rào quanh sự cố (cột cao) trên nền mưa phùn (đường chấm)")
+    ax[0].legend(fontsize=7)
+    c = cal.window_curve(d, r["far_s"], r["max_s"])
+    ax[1].plot(c["giay"], c["gan_sau"], label="warning gắn vào sự cố (cửa sổ 0 … A)")
+    ax[1].plot(c["giay"], c["ngau_nhien"], label="trong đó ước tính là ngẫu nhiên (mức nền × A)")
+    ax[1].plot(c["giay"], r["max_random_share"] * c["gan_sau"], ls="--", color="gray",
+               label=f"{r['max_random_share']:.0%} số warning gắn vào (mức chấp nhận)")
+    ax[1].axvline(after, color="red", ls="--", lw=1, label=f"đang dùng A = {after:g} s (chọn trên đợt 04–06)")
+    ax[1].axvline(a_here, color="green", ls=":", lw=1.2, label=f"áp công thức lên tủ/đợt này: A = {a_here:g} s")
+    ax[1].set_xlabel("độ dài cửa sổ sau t0, A (giây)"); ax[1].set_ylabel("số warning (cộng mọi sự cố)")
+    ax[1].set_title("Xô càng rộng hứng càng nhiều, nhưng mưa phùn cũng tăng.\n"
+                    f"Chọn A lớn nhất mà phần ngẫu nhiên ≤ {r['max_random_share']:.0%}")
+    ax[1].legend(fontsize=7)
     fig.tight_layout()
     inside = o[(o["giay"] >= -before) & (o["giay"] <= after)]
     names = fault_codes().set_index("code_key")["name"]
     top = lambda s: (s.value_counts().head(6).rename_axis("warning").reset_index(name="so_lan")
                      .assign(ten=lambda x: x["warning"].map(names)))
-    summary = pd.DataFrame({"khoang_giay": [f"{a:g}…{b:g}" for a, b in zip(edges[:-1], edges[1:])],
-                            "so_lan": cnt, "lan_moi_giay": rate.round(2)})
-    print(f"{len(o)} lần warning bật; {len(inside)} lần ({len(inside) / max(len(o), 1):.0%}) rơi vào cửa sổ; "
-          f"{far} lần cách sự cố gần nhất hơn 10 phút (chuyện riêng).")
-    print(f"Nếu áp công thức lên riêng tủ/đợt này: −{b_here:g} s … +{a_here:g} s (chỉ để so, không dùng để sửa).")
-    return fig, summary, top(inside["code"]), top(o.loc[o["giay"].abs() > 600, "code"])
+    pick = [10, 30, 60, 90, 120, 150, 200, 300]
+    bang = c[c["giay"].isin(pick)].assign(ty_le_ngau_nhien=lambda x: (x["ngau_nhien"] / x["gan_sau"].clip(lower=1))
+                                          .map("{:.0%}".format), ngau_nhien=lambda x: x["ngau_nhien"].round(0))
+    bang = bang[["giay", "gan_sau", "ngau_nhien", "ty_le_ngau_nhien"]]
+    print(f"{len(o)} lần warning bật; {len(inside)} lần rơi vào cửa sổ đang dùng. Mức nền {base:.2f} lần/giây.")
+    print(f"Nếu áp công thức ({r['max_random_share']:.0%}) lên riêng tủ/đợt này: −{b_here:g} s … +{a_here:g} s "
+          "(chỉ để so, không dùng để sửa).")
+    return fig, bang, top(inside["code"]), top(o.loc[o["giay"].abs() > 600, "code"])
 
 
 # ------------------------------------------------------------------ các bước mô hình
