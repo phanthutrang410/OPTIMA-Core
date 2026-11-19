@@ -39,7 +39,10 @@ def test_tr_folder_is_ignored(tmp_path):
     assert err.empty and warn.empty
 
 
-def test_codes_within_five_minutes_form_one_incident(tmp_path):
+def test_codes_within_five_minutes_form_one_incident(tmp_path, monkeypatch):
+    # kiểm logic gom với ngưỡng 5 phút; giá trị đang dùng nằm trong config/windows.json
+    from datetime import timedelta
+    monkeypatch.setattr(incidents, "INCIDENT_GAP", timedelta(minutes=5))
     write_log(tmp_path / "INV 1.1", [
         apu_line(3, "2026-09-01 10:00:00", 500, errors=[4]),
         apu_line(3, "2026-09-01 10:02:00", 0, errors=[]),

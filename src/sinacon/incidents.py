@@ -2,9 +2,10 @@
 
 Quy tắc (giống sổ lỗi Fault_log của nhóm):
   1. Đợt mã: mỗi (cấp, đơn vị, mã error) tính từ bản ghi đầu tiên có mã tới bản ghi đầu tiên không còn mã.
-  2. Sự cố: các đợt mã nối nhau, đợt sau bật trong vòng INCIDENT_GAP = 5 phút sau khi đợt trước tắt.
+  2. Sự cố: các đợt mã nối nhau, đợt sau bật trong vòng INCIDENT_GAP sau khi đợt trước tắt.
   3. Thời điểm sự cố t0 = lúc mã error đầu tiên bật (làm tròn xuống giây). Thiết bị và loại lỗi chính = ô của mã đó trong bảng hai tầng.
-  4. Bổ sung warning APS: mọi warning APS chuyển sang bật trong [t0 − 10 s, t0 + 90 s].
+  4. Bổ sung warning APS: mọi warning APS chuyển sang bật trong [t0 − WARN_BEFORE, t0 + WARN_AFTER].
+INCIDENT_GAP, WARN_BEFORE, WARN_AFTER đọc từ config/windows.json (chọn bằng công thức, xem sinacon/calibrate.py).
 
 Đầu ra mỗi dòng một sự cố: cabinet, inverter, apu ("1 2", hoặc "cả tủ"), t0, codes, first_device, first_fault_type.
 
@@ -19,11 +20,13 @@ from pathlib import Path
 
 import pandas as pd
 
+from sinacon.calibrate import load_windows
 from sinacon.config import code_device, fault_codes
 from sinacon.daily_log import find_inverter_dirs, parse_trigger_records, warning_activations
 
-INCIDENT_GAP = timedelta(minutes=5)
-WARN_BEFORE, WARN_AFTER = pd.Timedelta(seconds=10), pd.Timedelta(seconds=90)
+_W = load_windows()
+INCIDENT_GAP = timedelta(minutes=_W["incident_gap_min"])
+WARN_BEFORE, WARN_AFTER = pd.Timedelta(seconds=_W["warn_before_s"]), pd.Timedelta(seconds=_W["warn_after_s"])
 NOT_IN_MANUAL = "Không có trong manual 01/2020"
 COLUMNS = ["cabinet", "inverter", "apu", "t0", "codes", "first_device", "first_fault_type"]
 

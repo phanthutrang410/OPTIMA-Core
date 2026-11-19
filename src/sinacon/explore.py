@@ -454,7 +454,14 @@ def plot_warning_window(errors: pd.DataFrame, warnings: pd.DataFrame):
     far = (o["giay"].abs() > 600).sum()
     fig, ax = plt.subplots(figsize=(13, 4.2))
     ax.stairs(rate, edges, fill=True, alpha=0.6, label="số warning bật mỗi giây")
-    ax.axvspan(-before, after, color="red", alpha=0.12, label=f"cửa sổ đang dùng: −{before:g} s … +{after:g} s")
+    from sinacon import calibrate as cal
+    r = cal.RULE
+    b_here, a_here, base = cal.choose_warning_window(o["giay"].to_numpy(float), r["bin_s"], r["max_s"], r["far_s"],
+                                                     r["k_background"])
+    ax.axvspan(-before, after, color="red", alpha=0.12,
+               label=f"cửa sổ đang dùng (công thức trên đợt 04–06): −{before:g} s … +{after:g} s")
+    ax.axhline(r["k_background"] * base, color="k", ls=":", lw=1,
+               label=f"{r['k_background']:g} × mức nền của tủ này (xa sự cố {r['far_s'][0]}–{r['far_s'][1]} s)")
     ax.axvline(0, color="k", lw=1)
     ax.text(0, rate.max() * 1.02, " t0 = lúc mã lỗi đầu tiên bật", fontsize=8)
     ax.set_xlabel("thời gian so với t0 (giây; âm = trước t0)")
@@ -470,6 +477,7 @@ def plot_warning_window(errors: pd.DataFrame, warnings: pd.DataFrame):
                             "so_lan": cnt, "lan_moi_giay": rate.round(2)})
     print(f"{len(o)} lần warning bật; {len(inside)} lần ({len(inside) / max(len(o), 1):.0%}) rơi vào cửa sổ; "
           f"{far} lần cách sự cố gần nhất hơn 10 phút (chuyện riêng).")
+    print(f"Nếu áp công thức lên riêng tủ/đợt này: −{b_here:g} s … +{a_here:g} s (chỉ để so, không dùng để sửa).")
     return fig, summary, top(inside["code"]), top(o.loc[o["giay"].abs() > 600, "code"])
 
 
