@@ -17,16 +17,40 @@ def test_find_cabinet_and_log_root(tmp_path):
     assert explore.find_cabinet(root, "9.3") == d
 
 
-def test_find_period_inv_log_and_converted(tmp_path):
+def test_find_period_new_01_log_and_old_inv_log(tmp_path):
+    new = tmp_path / ".shortcut-targets-by-id" / "QQ" / "Trung Nam" / "01_log" / "2026-08-13_2026-10-31"
+    (new / "9" / "9.3" / "log").mkdir(parents=True)
     inv = tmp_path / "MyDrive" / "Trung Nam T5" / "data" / "Inv_log" / "4-4-2026-6-4-2026" / "processed data"
     (inv / "9" / "9.1" / "log").mkdir(parents=True)
-    conv = tmp_path / "MyDrive" / "SINACON_so_loi" / "log_goc" / "thang_1_3" / "9" / "9.3" / "log"
-    conv.mkdir(parents=True)
     link = "https://drive.google.com/drive/folders/XYZ"
+    assert explore.find_period(tmp_path, link, "Tháng 8–10/2026 (13/08–31/10)") == new
+    assert explore.find_period(tmp_path, link, "Tháng 9/2026") == new          # lựa chọn cũ vẫn chạy
     assert explore.find_period(tmp_path, link, "Tháng 4–6/2026 (04/04–03/06)") == inv
-    root = explore.find_period(tmp_path, link, "Tháng 1–3/2026 (12/01–12/03)")
-    assert explore.find_cabinet(root, "9.3") == conv.parent
-    assert {v[2] for v in explore.PERIODS.values()} >= {"thang_1_3", "thang_10"}
+
+
+def test_split_tables_rebuilt_as_daily_logs(tmp_path, monkeypatch):
+    monkeypatch.setattr(explore, "CACHE", tmp_path / "cache")
+    log = tmp_path / "01_log" / "p" / "9" / "9.3" / "log"
+    log.mkdir(parents=True)
+    (log / "APS_Stat_Trig.csv").write_text(
+        "﻿Log Type,System,Time Stamp,Milliseconds/ms,OpState," + ",".join(f"Error{i}" for i in range(1, 9))
+        + "," + ",".join(f"Warning{i}" for i in range(1, 9)) + "\n"
+        "APS Stat Trig,APS,2026-08-13 00:00:00,005,20000," + ",".join(["0"] * 16) + "\n"
+        "APS Stat Trig,APS,2026-08-14 05:00:00,010,0,42,43," + ",".join(["0"] * 14) + "\n", encoding="utf-8")
+    head = "APU Stat Trig,APU,TimeStamp,Milliseconds/ms,OpState," + ",".join(["x"] * 10) + "," + ",".join(
+        f"Error{i}" for i in range(1, 9))
+    (log / "APU_Stat_Trig.csv").write_text(            # dạng 'Values...' + tiêu đề thật ở dòng 2, lặp lại giữa file
+        "﻿Log Type,System,Time Stamp,Values...\n" + head + "\n"
+        "APU Stat Trig,APU 3,2026-08-14 10:03:11,200,500," + ",".join(["0"] * 10) + ",3,0,0,0,0,0,0,0\n"
+        + head + "\n", encoding="utf-8")
+    cab = explore.find_cabinet(tmp_path / "01_log" / "p", "9.3")
+    assert sorted(f.name for f in cab.glob("*.csv")) == ["APS-000344_20260813_000000.csv",
+                                                         "APS-000344_20260814_000000.csv"]
+    name, errors, _ = explore.read_cabinet(cab)
+    assert name == "APS-000344"
+    assert {(r.scope, r.unit, r.codes) for r in errors.itertuples() if r.codes} == {("APS", 0, (42, 43)),
+                                                                                   ("APU", 3, (3,))}
+    assert explore.find_cabinet(tmp_path / "01_log" / "p", "9.3") == cab   # lần sau dùng lại
 
 
 def test_device_table_has_ten_devices_and_operation():

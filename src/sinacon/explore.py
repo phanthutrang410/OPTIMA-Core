@@ -4,7 +4,10 @@ Mọi hàm chỉ đọc thư mục log; kết quả ghi vào thư mục out do n
 """
 from __future__ import annotations
 
+import csv
+import hashlib
 import os
+import tempfile
 from collections import Counter
 from pathlib import Path
 
@@ -13,7 +16,7 @@ import pandas as pd
 
 from sinacon import incidents as inc_mod
 from sinacon import tier1, windows
-from sinacon.config import code_device, fault_codes
+from sinacon.config import cabinet_to_inverter, code_device, fault_codes
 from sinacon.daily_log import INVERTER_DIR_RE, LOG_RE, iter_log_files, parse_trigger_records
 
 # loại dòng -> (các cột chính, mô hình hiện tại, có thể dùng cho). Tên cột lấy từ dòng tiêu đề trong log;
@@ -106,16 +109,23 @@ def find_log_root(drive: Path, link: str, sub: str) -> Path:
     raise FileNotFoundError(f"Không thấy '{sub}'. Kiểm tra đã thêm lối tắt thư mục dữ liệu vào Drive của tôi chưa.")
 
 
-# Lựa chọn trong notebook -> (nơi tìm, tên thư mục, tên thư mục kết quả). "data": dưới thư mục dữ liệu nhóm (DATA_LINK);
-# "any": tìm theo tên ở mọi chỗ trong Drive đã kết nối; "mine": thư mục riêng trong Drive của tôi.
+# Lựa chọn trong notebook -> ("01_log", tên thư mục đợt, tên thư mục kết quả; vị trí [2] giữ như bản cũ). Từ 18/11/2026 nhóm xếp lại Drive:
+# "Trung Nam/01_log/<đợt>/<tuyến>/<tủ>/log/" và mỗi tủ là các BẢNG TÁCH (APU_Stat_Trig.csv… gộp cả đợt), không còn
+# file log ngày. Tên cũ (Inv_log) để dự phòng. Tháng 8, 9, 10/2026 nay chung một thư mục 13/08–31/10.
 PERIODS = {
-    "Tháng 1–3/2026 (12/01–12/03)": ("mine", "SINACON_so_loi/log_goc/thang_1_3", "thang_1_3"),
-    "Tháng 4–6/2026 (04/04–03/06)": ("any", "4-4-2026-6-4-2026", "thang_4_6"),
-    "Tháng 6–8/2026 (13/06–13/08)": ("any", "6-13-2026-8-13-2026", "thang_6_8"),
-    "Tháng 8/2026": ("data", "Log file/08_2026", "thang_8"),
-    "Tháng 9/2026": ("data", "Log file/September 2026", "thang_9"),
-    "Tháng 10/2026": ("data", "Log file/10_2026", "thang_10"),
+    "Tháng 10/2025": ("01_log", ["2025-10"], "thang_10_2025"),
+    "Tháng 1–3/2026 (12/01–12/03)": ("01_log", ["2026-01-12_2026-03-12"], "thang_1_3"),
+    "Tháng 4–6/2026 (04/04–03/06)": ("01_log", ["2026-04-04_2026-06-04", "4-4-2026-6-4-2026"], "thang_4_6"),
+    "Tháng 6–8/2026 (13/06–13/08)": ("01_log", ["2026-06-13_2026-08-13", "6-13-2026-8-13-2026"], "thang_6_8"),
+    "Tháng 8–10/2026 (13/08–31/10)": ("01_log", ["2026-08-13_2026-10-31"], "thang_8_10"),
 }
+for _old in ("Tháng 8/2026", "Tháng 9/2026", "Tháng 10/2026"):      # tab Colab cũ còn giữ lựa chọn cũ
+    PERIODS[_old] = PERIODS["Tháng 8–10/2026 (13/08–31/10)"]
+
+# Bảng tách -> log ngày (dựng trên đĩa máy Colab, không ghi lên Drive)
+SPLIT_TABLES = ("APU_Stat_Trig", "APS_Stat_Trig", "APU_Stat_60s", "APU_Stat_10s", "APS_Stat_60s", "APS_Stat_10s",
+                "APU_Ctrl_Trig", "APS_Ctrl_Trig", "APU_Energy", "APS_Energy", "APS_Switching_Cycles")
+CACHE = Path("/content/sinacon_cache") if Path("/content").is_dir() else Path(tempfile.gettempdir()) / "sinacon_cache"
 
 
 def _find_by_name(bases: list[Path], name: str, max_depth: int = 5) -> Path | None:
@@ -123,6 +133,7 @@ def _find_by_name(bases: list[Path], name: str, max_depth: int = 5) -> Path | No
         if not base.is_dir():
             continue
         for d, subdirs, _ in os.walk(base):
+            subdirs[:] = [s for s in subdirs if not s.startswith("SINACON_")]   # bỏ thư mục kết quả của mình
             if name in subdirs:
                 folder = Path(d) / name
                 for sub in ("processed data", "inprocessing"):   # có thư mục đã xử lý thì dùng nó
@@ -136,33 +147,100 @@ def _find_by_name(bases: list[Path], name: str, max_depth: int = 5) -> Path | No
 
 
 def find_period(drive: Path, link: str, choice: str) -> Path:
-    """Thư mục log của lựa chọn `choice` (khóa của PERIODS)."""
+    """Thư mục log của lựa chọn `choice` (khóa của PERIODS). Tìm nhanh ở <lối tắt>/<thư mục>/01_log/<đợt>,
+    không thấy thì dò theo tên trong các lối tắt, Drive của tôi, Drive dùng chung. `link` giữ để tương thích."""
     drive = Path(drive)
-    where, sub, _ = PERIODS[choice]
-    if where == "data":
-        return find_log_root(drive, link, sub)
-    if where == "mine":
-        p = drive / "MyDrive" / sub
-        if p.is_dir():
-            return p
-        raise FileNotFoundError(f"Chưa có {p}. Tháng 1–3 trên Drive nhóm chỉ có dạng bảng tách; bản log ngày được "
-                                "dựng lại bằng SINACON_colab.ipynb (ô 2b, giai đoạn thang_1_3).")
-    fid = link.rstrip("/").split("folders/")[-1].split("?")[0]
-    found = _find_by_name([drive / ".shortcut-targets-by-id" / fid, drive / "MyDrive",
-                           drive / ".shortcut-targets-by-id", drive / "Shareddrives"], sub)
-    if found is None:
-        raise FileNotFoundError(f"Không thấy thư mục '{sub}'. Nếu nó chỉ nằm ở 'Được chia sẻ với tôi': chuột phải "
-                                "thư mục Inv_log -> Sắp xếp -> Thêm lối tắt -> Drive của tôi, rồi chạy lại ô 2.")
-    return found
+    _, names, _ = PERIODS[choice]
+    sc = drive / ".shortcut-targets-by-id"
+    tops = [c for t in (sorted(sc.iterdir()) if sc.is_dir() else []) if t.is_dir() for c in t.iterdir() if c.is_dir()]
+    tops += [c for c in (drive / "MyDrive").iterdir() if c.is_dir()] if (drive / "MyDrive").is_dir() else []
+    for name in names:
+        for top in tops:
+            if (top / "01_log" / name).is_dir():
+                return top / "01_log" / name
+    for name in names:
+        found = _find_by_name([sc, drive / "MyDrive", drive / "Shareddrives"], name)
+        if found is not None:
+            return found
+    raise FileNotFoundError(f"Không thấy thư mục '{names[0]}'. Thêm lối tắt thư mục 'Trung Nam' (có 01_log) vào "
+                            "Drive của tôi: chuột phải -> Sắp xếp -> Thêm lối tắt -> Drive của tôi, rồi chạy lại ô 2.")
+
+
+def split_to_daily(log_dir: Path, aps: str, out_dir: Path) -> int:
+    """Dựng lại log ngày `<aps>_YYYYMMDD_000000.csv` (dấu ;) từ các bảng tách của một tủ; trả về số ngày.
+    Nhận cả hai dạng tiêu đề: 'Log Type,System,Time Stamp,<cột…>' và 'Log Type,System,Time Stamp,Values...'
+    + dòng tiêu đề thật ở dòng sau (có thể lặp lại giữa file)."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    headers, handles = [], {}
+    try:
+        for table in SPLIT_TABLES:
+            src = log_dir / f"{table}.csv"
+            if not src.is_file():
+                continue
+            kind = table.replace("_", " ")
+            with src.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+                rows = csv.reader(fh)
+                head = next(rows, None)
+                if head and len(head) > 3 and head[3].startswith("Values"):
+                    head = next(rows, None)
+                if not head or len(head) < 4:
+                    continue
+                headers.append(";".join([kind, kind.split()[0], "TimeStamp", *head[3:]]))
+                for r in rows:
+                    if len(r) < 3 or r[2] in ("TimeStamp", "Time Stamp"):
+                        continue
+                    day = r[2][:10].replace("-", "")
+                    if len(day) != 8 or not day.isdigit():
+                        continue
+                    h = handles.get(day)
+                    if h is None:
+                        h = handles[day] = (out_dir / f".{day}.part").open("w", encoding="utf-8", newline="")
+                    h.write(";".join(r) + "\r\n")
+    finally:
+        for h in handles.values():
+            h.close()
+    for day in sorted(handles):
+        part = out_dir / f".{day}.part"
+        with (out_dir / f"{aps}_{day}_000000.csv").open("w", encoding="utf-8", newline="") as out:
+            out.write("Log Type;System;Time Stamp;Column Header...\r\n" + "".join(x + "\r\n" for x in headers))
+            out.write(part.read_text(encoding="utf-8"))
+        part.unlink()
+    return len(handles)
+
+
+def prepare_cabinet(cab_dir: Path, inverter: str) -> Path:
+    """Thư mục có log ngày của tủ. Tủ dạng bảng tách thì dựng log ngày vào CACHE (một lần mỗi phiên Colab).
+    Báo khi mã APS trong file không khớp tủ theo config/cabinets.csv."""
+    expected = {v: k for k, v in cabinet_to_inverter().items()}.get(inverter)
+    split = next((d for d in (cab_dir / "log", cab_dir) if (d / "APU_Stat_Trig.csv").is_file()), None)
+    if split is None:
+        found = sorted({m.group(1) for f, _ in iter_log_files(cab_dir) if (m := LOG_RE.search(f))})
+        if expected and found and expected not in found:
+            print(f"!!! CẢNH BÁO: thư mục tủ {inverter} chứa log của {', '.join(found)}, nhưng tủ {inverter} là "
+                  f"{expected}. Thư mục trên Drive có thể bị xếp nhầm tủ.")
+        return cab_dir
+    aps = expected or "APS-000000"
+    sig = "|".join(f"{f.name}:{f.stat().st_size}" for f in sorted(split.glob("*.csv")))
+    out = CACHE / hashlib.sha1(str(cab_dir).encode()).hexdigest()[:10] / inverter
+    if (out / ".xong").is_file() and (out / ".xong").read_text(encoding="utf-8") == sig:
+        return out
+    print(f"Tủ {inverter} ở dạng bảng tách (gộp cả đợt): đang dựng lại log ngày, khoảng 1–5 phút…", flush=True)
+    for old in out.glob("*.csv"):
+        old.unlink()
+    n = split_to_daily(split, aps, out)
+    (out / ".xong").write_text(sig, encoding="utf-8")
+    print(f"Xong: {n} ngày, mã tủ {aps}.", flush=True)
+    return out
 
 
 def find_cabinet(root: Path, inverter: str) -> Path:
-    """Thư mục log của tủ `inverter` (vd "9.3") dưới root; tên thư mục có thể là "9.3", "INV 9.3", "inv 9.3"."""
+    """Thư mục log ngày của tủ `inverter` (vd "9.3") dưới root; tên thư mục có thể là "9.3", "INV 9.3", "inv 9.3".
+    Tủ dạng bảng tách thì trả về thư mục log ngày đã dựng lại (xem prepare_cabinet)."""
     for d, subdirs, _ in os.walk(root):
         for s in sorted(subdirs):
             m = INVERTER_DIR_RE.fullmatch(s.strip())
             if m and m.group(1) == inverter:
-                return Path(d) / s
+                return prepare_cabinet(Path(d) / s, inverter)
     raise FileNotFoundError(f"Không thấy thư mục tủ {inverter} dưới {root}")
 
 
@@ -170,7 +248,7 @@ def list_files(cab_dir: Path) -> pd.DataFrame:
     rows = []
     for f in sorted(cab_dir.rglob("*.csv")):
         m = LOG_RE.search(f.name)
-        if m and "TR" not in f.relative_to(cab_dir).parts:
+        if m and "TR" not in [x.upper() for x in f.relative_to(cab_dir).parts]:
             rows.append(dict(file=f.name, ngay=pd.to_datetime(m.group(2)).date(), MB=round(f.stat().st_size / 1e6, 1)))
     if not rows:
         print(f"!!! Không có file log nào trong {cab_dir}. Nếu đường dẫn nằm trong SINACON_mo_hinh_lai/SINACON_so_loi "

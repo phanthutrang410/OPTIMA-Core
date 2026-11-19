@@ -38,7 +38,7 @@ def iter_log_files(inv_dir: Path) -> Iterator[tuple[str, Callable[[], bytes]]]:
     """(tên file, hàm đọc nội dung) cho mọi log ngày của một tủ, kể cả trong zip; bỏ trùng tên và thư mục TR."""
     seen = set()
     for f in sorted(inv_dir.rglob("*.csv")):
-        if LOG_RE.search(f.name) and "TR" not in f.relative_to(inv_dir).parts and f.name not in seen:
+        if LOG_RE.search(f.name) and "TR" not in [x.upper() for x in f.relative_to(inv_dir).parts] and f.name not in seen:
             seen.add(f.name)
             yield f.name, (lambda f=f: f.read_bytes())
     for z in sorted(inv_dir.rglob("*.zip")):
