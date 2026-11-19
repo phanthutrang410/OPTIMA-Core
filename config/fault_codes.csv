@@ -50,6 +50,7 @@ APS/error/48,APS,error,48,APU1/2 Insulation Monitoring (neg. ground),G08,A48,INS
 APS/error/49,APS,error,49,APU3/4 Insulation Monitoring (neg. ground),G08,A49,INSULATION,Cách điện và nối đất,Phản hồi nối đất dương / âm
 APS/error/50,APS,error,50,APU1/2 extern Insulation Monitoring,G08,A50,INSULATION,Cách điện và nối đất,IMD ngoài báo lỗi
 APS/error/51,APS,error,51,APU3/4 extern Insulation Monitoring,G08,A51,INSULATION,Cách điện và nối đất,IMD ngoài báo lỗi
+APS/error/52,APS,error,52,Not in Siemens list (seen only at controller restart),,A52,CONTROL,"Bộ điều khiển (control card, APMC)","Sai cấu hình, chế độ, cấp phép, đang cập nhật"
 APS/error/53,APS,error,53,APU1/2 high Temperature,G01,A53,ENCLOSURE,Môi trường tủ,Công tắc nhiệt báo sai
 APS/error/54,APS,error,54,APU3/4 high Temperature,G01,A54,ENCLOSURE,Môi trường tủ,Công tắc nhiệt báo sai
 APS/error/55,APS,error,55,APU1/2 Island Fuses,G07,A55,SWITCHGEAR,Thiết bị đóng cắt và bảo vệ,Cầu chì island

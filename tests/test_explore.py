@@ -31,4 +31,4 @@ def test_find_period_inv_log_and_converted(tmp_path):
 
 def test_device_table_has_ten_devices_and_operation():
     t = explore.device_table()
-    assert len(t) == 11 and t["so_ma"].iloc[:10].sum() == 167
+    assert len(t) == 11 and t["so_ma"].iloc[:10].sum() == 168
