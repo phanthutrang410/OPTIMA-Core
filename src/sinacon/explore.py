@@ -97,6 +97,7 @@ def find_log_root(drive: Path, link: str, sub: str) -> Path:
             return cand
     last = Path(sub).name
     for d, subdirs, _ in os.walk(drive / "MyDrive"):
+        subdirs[:] = [s for s in subdirs if not s.startswith("SINACON_")]   # bỏ thư mục kết quả của mình
         if Path(d).relative_to(drive / "MyDrive").parts.__len__() >= 4:
             subdirs[:] = []
             continue
@@ -171,7 +172,10 @@ def list_files(cab_dir: Path) -> pd.DataFrame:
         m = LOG_RE.search(f.name)
         if m and "TR" not in f.relative_to(cab_dir).parts:
             rows.append(dict(file=f.name, ngay=pd.to_datetime(m.group(2)).date(), MB=round(f.stat().st_size / 1e6, 1)))
-    return pd.DataFrame(rows)
+    if not rows:
+        print(f"!!! Không có file log nào trong {cab_dir}. Nếu đường dẫn nằm trong SINACON_mo_hinh_lai/SINACON_so_loi "
+              "thì đó là thư mục KẾT QUẢ, không phải log: tab Colab đang giữ ô 2 cũ, mở lại notebook từ GitHub.")
+    return pd.DataFrame(rows, columns=["file", "ngay", "MB"])
 
 
 def _first_file(cab_dir: Path, day: str | None = None) -> tuple[str, str]:

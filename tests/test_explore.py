@@ -32,3 +32,11 @@ def test_find_period_inv_log_and_converted(tmp_path):
 def test_device_table_has_ten_devices_and_operation():
     t = explore.device_table()
     assert len(t) == 11 and t["so_ma"].iloc[:10].sum() == 168
+
+
+def test_find_log_root_skips_own_output_folders(tmp_path):
+    (tmp_path / "MyDrive" / "SINACON_mo_hinh_lai" / "tung_buoc" / "10_2026" / "9.3").mkdir(parents=True)
+    real = tmp_path / "MyDrive" / "Log file" / "10_2026"
+    (real / "TUYEN 9" / "INV 9.3").mkdir(parents=True)
+    assert explore.find_log_root(tmp_path, "https://drive.google.com/drive/folders/NONE", "Log file/10_2026") == real
+    assert list(explore.list_files(real).columns) == ["file", "ngay", "MB"]
